@@ -1,0 +1,1584 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "This is a sample of Carstore server.",
+    "version": "1.0.6",
+    "title": "Swagger Cars",
+    "contact": {
+      "email": "ihnatchukpp@gmail.com"
+    }
+  },
+  "host": "localhost:5000",
+  "basePath": "/",
+  "tags": [
+    {
+      "name": "Admin",
+      "description": "Administrator can create and update other users and appoint them roles: seller, premiumSeller, manager and another admin."
+    },
+    {
+      "name": "Auth",
+      "description": "Admin and ordinary users can register and login here. They can refresh their access token also."
+    },
+    {
+      "name": "Users",
+      "description": "Operations with user's accounts. Administrator or manager can get users, create, update and delete them, set a role of premiumSeller, even change passwords."
+    },
+    {
+      "name": "Brands",
+      "description": "Operations with car's brand and model list. Administrator or manager can get, create, update and delete brands and their models. Models list can be updated by list of models."
+    },
+    {
+      "name": "Cars",
+      "description": "We can create car's ads with description and photos. Ad becomes active after validation. You can update car's ad a lot of times, but you have only 3 attempts to activate it. If you want to sell more than one car you should buy a premium account. Non authorised user can get all cars' ads."
+    },
+    {
+      "name": "Currency",
+      "description": "You can get current xchange of USD as a base currency. Data updated at 5am every day form PrivatBank API."
+    },
+    {
+      "name": "Messages",
+      "description": "Authorised user can send a message for admin or manager, can get all his own messages also. Admin or manager can get all massages or delete them."
+    },
+    {
+      "name": "Comments",
+      "description": "Authorised user can write a comment to a car's ad, and can get all comments to car's ad."
+    },
+    {
+      "name": "Statistics",
+      "description": "Premium seller can get statistics of views of his ads, average price of his cars in his location and in whole state. Ad treats as viewed if it is gotten by Id."
+    }
+  ],
+  "paths": {
+    "/admin/users": {
+      "post": {
+        "tags": ["Admin"],
+        "summary": "Create a new admin or manager",
+        "security": [
+          {
+            "AccessToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UserCreateByAdmin"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User created successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/admin/users/{userId}": {
+      "put": {
+        "tags": ["Admin"],
+        "summary": "Update a user",
+        "security": [
+          {
+            "AccessToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UserUpdateByAdmin"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User updated successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "User not found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/auth/register": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Register a new user",
+        "parameters": [{
+          "name": "body",
+          "in": "body",
+          "required": true,
+          "schema": {
+            "$ref": "#/definitions/RegisterRequest"
+          }
+        }],
+        "responses": {
+          "200": {
+            "description": "User registered successfully"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/auth/register/admin": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Register a new admin",
+        "parameters": [{
+          "name": "body",
+          "in": "body",
+          "required": true,
+          "schema": {
+            "$ref": "#/definitions/RegisterRequest"
+          }
+        }],
+        "responses": {
+          "200": {
+            "description": "Admin registered successfully"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "User login",
+        "parameters": [{
+          "name": "body",
+          "in": "body",
+          "required": true,
+          "schema": {
+            "$ref": "#/definitions/LoginRequest"
+          }
+        }],
+        "responses": {
+          "200": {
+            "description": "Login successful"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/auth/password/forgot": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "User can restore forgotten password ",
+        "parameters": [{
+          "name": "body",
+          "in": "body",
+          "required": true,
+          "schema": {
+            "$ref": "#/definitions/Email"
+          }
+        }],
+        "responses": {
+          "200": {
+            "description": "Login successful"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/auth/password/forgot/{ActionToken}": {
+      "put": {
+        "tags": ["Auth"],
+        "summary": "User can set new password ",
+        "parameters": [
+          {
+            "name": "ActionToken",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+          "name": "body",
+          "in": "body",
+          "required": true,
+          "schema": {
+            "$ref": "#/definitions/NewPassword"
+          }
+        }],
+        "responses": {
+          "200": {
+            "description": "Login successful"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Refresh access token",
+        "security": [
+          {
+            "RefreshToken": []
+          }
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Access token refreshed successfully"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/auth/password/change": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "User can change password here",
+        "security": [
+          {
+            "AccessToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ChangePassword"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Access token refreshed successfully"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/users": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Get all users",
+        "security": [
+          {
+            "AccessToken": []
+          },
+          {
+            "RolePermission": [
+              "manager",
+              "admin"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Create a new user by manager or admin",
+        "security": [
+          {
+            "AccessToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UserCreateByAdmin"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/users/{userId}": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Get user by ID",
+        "security": [
+          {
+            "AccessToken": []
+          },
+          {
+            "RolePermission": [
+              "manager",
+              "admin"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Update user by ID (self-update)",
+        "security": [
+          {
+            "AccessToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UserUpdate"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Delete user by ID",
+        "security": [
+          {
+            "AccessToken": []
+          },
+          {
+            "RolePermission": [
+              "manager",
+              "admin"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/users/update/{userId}": {
+      "put": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Update user by ID (admin or manager)",
+        "security": [
+          {
+            "AccessToken": []
+          },
+          {
+            "RolePermission": [
+              "manager",
+              "admin"
+            ]
+          },
+          {
+            "RoleSet": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UserUpdateByAdmin"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/brands": {
+      "get": {
+        "tags": ["Brands"],
+        "summary": "Get all brands",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "post": {
+        "tags": ["Brands"],
+        "summary": "Create a new brand",
+        "security": [
+          {
+            "AccessToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/BrandCreate"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Brand created successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/brands/{carBrandId}": {
+      "put": {
+        "tags": ["Brands"],
+        "summary": "Update a brand",
+        "security": [
+          {
+            "AccessToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "carBrandId",
+            "in": "path",
+            "type": "string",
+            "required": true,
+            "description": "Car brand ID"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/BrandUpdate"
+            }
+          }
+
+        ],
+        "responses": {
+          "200": {
+            "description": "Brand updated successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Brand not found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Brands"],
+        "summary": "Delete a brand",
+        "security": [
+          {
+            "AccessToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "carBrandId",
+            "in": "path",
+            "type": "string",
+            "required": true,
+            "description": "Car brand ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Brand deleted successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Brand not found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/cars": {
+      "get": {
+        "tags": ["Cars"],
+        "summary": "Get all activated cars",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "tags": ["Cars"],
+        "summary": "Create a new car",
+        "security": [
+          {
+            "AccessToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CarSale"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/cars/all": {
+      "get": {
+        "tags": ["Cars"],
+        "summary": "Get all cars. Only for manager or admin.",
+        "security": [
+          {
+            "AccessToken": []
+          },
+          {
+            "RolePermission": [
+              "manager",
+              "admin"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/cars/my": {
+      "get": {
+        "tags": ["Cars"],
+        "summary": "Get cars belonging to the authenticated user",
+        "security": [
+          {
+            "AccessToken": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/cars/{carId}": {
+      "get": {
+        "tags": ["Cars"],
+        "summary": "Get a car by ID",
+        "parameters": [
+          {
+            "name": "carId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "put": {
+        "tags": ["Cars"],
+        "summary": "Update a car by ID",
+        "security": [
+          {
+            "AccessToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "carId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CarSale"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+
+      "delete": {
+        "tags": ["Cars"],
+        "summary": "Delete a car by ID",
+        "security": [
+          {
+            "AccessToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "carId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/cars/{carId}/photos": {
+      "put": {
+        "tags": ["Cars"],
+        "summary": "Upload array of photos for a car by ID",
+        "security": [
+          {
+            "AccessToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "carId",
+            "in": "path",
+            "description": "ID of the car",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "photos",
+            "in": "formData",
+            "description": "Photos to upload",
+            "required": true,
+            "type": "array",
+            "items": {
+              "type": "file"
+            }
+          }
+        ],
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/cars/activate/{carId}": {
+      "put": {
+        "tags": ["Cars"],
+        "summary": "Check description for obscene words and activate a car by ID",
+        "security": [
+          {
+            "AccessToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "carId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/cars/allow-to-activate/{carId}": {
+      "put": {
+        "tags": ["Cars"],
+        "summary": "Manager can give additional attempts to activate car ad.",
+        "security": [
+          {
+            "AccessToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "carId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/activateAttempts"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/cars/delete/{carId}": {
+      "delete": {
+        "tags": ["Cars"],
+        "summary": "Delete a car by ID. For manager and admin.",
+        "security": [
+          {
+            "AccessToken": []
+          },
+          {
+            "RolePermission": [
+              "manager",
+              "admin"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "carId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/currency": {
+      "get": {
+        "tags": ["Currency"],
+        "summary": "Get today's currency rates",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/Currency"
+            }
+          }
+        }
+      }
+    },
+    "/msg": {
+      "get": {
+        "tags": ["Messages"],
+        "summary": "Get all messages. For admin and manager only.",
+        "security": [
+          {
+            "AccessToken": []
+          },
+          {
+            "RolePermission": [
+              "manager",
+              "admin"
+            ]
+          }
+        ],
+        "parameters": [
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "tags": ["Messages"],
+        "summary": "Create a new message",
+        "security": [
+          {
+            "AccessToken": []
+          },
+          {
+            "RolePermission": [
+              "manager",
+              "admin"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Message"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/msg/my": {
+      "get": {
+        "tags": ["Messages"],
+        "summary": "Get messages belonging to the authenticated user",
+        "security": [
+          {
+            "AccessToken": []
+          },
+          {
+            "RolePermission": [
+              "manager",
+              "admin"
+            ]
+          }
+        ],
+        "parameters": [
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/msg/{messageId}": {
+      "delete": {
+        "tags": ["Messages"],
+        "summary": "Delete a message by ID",
+        "security": [
+          {
+            "AccessToken": []
+          },
+          {
+            "RolePermission": [
+              "manager",
+              "admin"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "messageId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/comments/{carId}": {
+      "get": {
+        "tags": ["Comments"],
+        "summary": "Get comments by car ID",
+        "parameters": [
+          {
+            "name": "carId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "tags": ["Comments"],
+        "summary": "Create a new comment",
+        "parameters": [
+          {
+            "name": "carId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Comment"
+            }
+          }
+        ],
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/statistics/views/{carId}/{days}": {
+      "get": {
+        "tags": [
+          "Statistics"
+        ],
+        "summary": "Get views statistics for a car",
+        "security": [
+          {
+            "AccessToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "carId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "days",
+            "in": "path",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/statistics/rap/{carId}": {
+      "get": {
+        "tags": [
+          "Statistics"
+        ],
+        "summary": "Get region average price of similar cars",
+        "security": [
+          {
+            "AccessToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "carId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/statistics/ap/{carId}": {
+      "get": {
+        "tags": [
+          "Statistics"
+        ],
+        "summary": "Get average price of similar cars in whole state",
+        "security": [
+          {
+            "AccessToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "carId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  },
+
+
+  "definitions": {
+    "CarSale": {
+      "type": "object",
+      "properties": {
+        "_user_id": {
+          "type": "string",
+          "description": "The ID of the user associated with the car"
+        },
+        "brand": {
+          "type": "string",
+          "description": "The brand of the car",
+          "example": "Toyota"
+        },
+        "model": {
+          "type": "string",
+          "description": "The model of the car",
+          "example": "Corolla"
+        },
+        "year": {
+          "type": "integer",
+          "description": "The year of the car",
+          "example": 2020
+        },
+        "price": {
+          "type": "number",
+          "description": "The price of the car",
+          "example": 25000
+        },
+        "currency": {
+          "type": "string",
+          "description": "The currency of the car's price",
+          "example": "USD"
+        },
+        "fuel": {
+          "type": "string",
+          "description": "The fuel type of the car",
+          "example": "Gasoline"
+        },
+        "engineVolume": {
+          "type": "number",
+          "description": "The engine volume of the car",
+          "example": 2.0
+        },
+        "doors": {
+          "type": "integer",
+          "description": "The number of doors in the car",
+          "example": 4
+        },
+        "mileage": {
+          "type": "integer",
+          "description": "The mileage of the car",
+          "example": 50000
+        },
+        "seats": {
+          "type": "integer",
+          "description": "The number of seats in the car",
+          "example": 5
+        },
+        "color": {
+          "type": "string",
+          "description": "The color of the car",
+          "example": "Blue"
+        },
+        "location": {
+          "type": "string",
+          "description": "The location of the car",
+          "example": "Lvivska obl"
+        },
+        "features": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "An array of features of the car"
+        },
+        "description": {
+          "type": "string",
+          "description": "The description of the car",
+          "example": "Машина у сепер стані, як нова. Повний фарш."
+        },
+        "photos": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "An array of photo URLs associated with the car"
+        },
+        "active": {
+          "type": "boolean",
+          "description": "The activation status of the car"
+        },
+        "activateAttempts": {
+          "type": "integer",
+          "example": 3,
+          "description": "The number of activation attempts for the car"
+        }
+      }
+    },
+    "BrandCreate": {
+      "type": "object",
+      "properties": {
+        "brand": {
+          "type": "string",
+          "example": "Audi",
+          "description": "Brand name of a car"
+        },
+        "models": {
+          "type": "array",
+          "example": ["A6", "A8", "Q5","Q7"],
+          "description": "Array of car models"
+        }
+      },
+      "required": ["brand", "models"]
+    },
+    "BrandUpdate": {
+      "type": "object",
+      "properties": {
+        "brand": {
+          "type": "string",
+          "example": "Audi",
+          "description": "Brand name of a car"
+        },
+        "models": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "example": ["A6", "A8", "Q5","Q7"],
+          "description": "Array of car models"
+        }
+      }
+    },
+    "Currency": {
+      "type": "object",
+      "properties": {
+        "uah": {
+          "type": "number",
+          "example": 37.0,
+          "description": "The currency rate for Ukrainian Hryvnia (UAH)"
+        },
+        "eur": {
+          "type": "number",
+          "example": 0.924,
+          "description": "The currency rate for Euro (EUR)"
+        }
+      }
+    },
+    "Message": {
+      "type": "object",
+      "properties": {
+        "_user_id": {
+          "type": "string",
+          "description": "The ID of the user sending the message"
+        },
+        "whom": {
+          "type": "string",
+          "enum": ["manager", "admin"],
+          "description": "The recipient of the message"
+        },
+        "messageTheme": {
+          "type": "string",
+          "description": "The theme of the message"
+        },
+        "messageText": {
+          "type": "string",
+          "description": "The content of the message"
+        }
+      }
+    },
+    "Comment": {
+      "type": "object",
+      "properties": {
+        "comment": {
+          "type": "string",
+          "description": "The content of the comment"
+        }
+      }
+    },
+    "activateAttempts": {
+      "type": "object",
+      "properties": {
+        "activateAttempts": {
+          "type": "number",
+          "description": "Amount of attempts to activate a car",
+          "example": 3
+        }
+      },
+      "required": ["activateAttempts"]
+    },
+    "RegisterRequest": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The name of the user",
+          "example": "Dima"
+        },
+        "email": {
+          "type": "string",
+          "description": "The email address of the user",
+          "pattern": "^[^\\s@]+@([^\\s@.,]+\\.)+[^\\s@.,]{2,}$",
+          "example": "dima@gmail.com"
+        },
+        "password": {
+          "type": "string",
+          "pattern": "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%_*#?&])[A-Za-z\\d@$_!%*#?&]{8,}$",
+          "description": "The password of the user",
+          "example": "Ab12345!"
+        },
+        "age": {
+          "type": "number",
+          "description": "The age of the user",
+          "example": "46"
+        },
+        "gender": {
+          "type": "string",
+          "enum": ["male", "female", "mixed"],
+          "description": "The gender of the user",
+          "example": "male"
+        },
+        "phone": {
+          "type": "string",
+          "pattern": "^([+]?\\d{1,2}[-\\s]?|)\\d{3}[-\\s]?\\d{3}[-\\s]?\\d{4}$",
+          "description": "The phone number of the user",
+          "example": "+380675555555"
+        }
+      },
+      "required": ["name", "email", "password", "phone"]
+    },
+    "LoginRequest": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "description": "The email address of the user",
+          "pattern": "^[^\\s@]+@([^\\s@.,]+\\.)+[^\\s@.,]{2,}$",
+          "example": "dima@gmail.com"
+        },
+        "password": {
+          "type": "string",
+          "pattern": "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%_*#?&])[A-Za-z\\d@$_!%*#?&]{8,}$",
+          "description": "The password of the user",
+          "example": "Ab12345!"
+        }
+      },
+      "required": ["email", "password"]
+    },
+    "Email": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "description": "The email address of the user",
+          "pattern": "^[^\\s@]+@([^\\s@.,]+\\.)+[^\\s@.,]{2,}$",
+          "example": "dima@gmail.com"
+        }
+      },
+      "required": ["email"]
+    },
+    "NewPassword": {
+      "type": "object",
+      "properties": {
+        "newPassword": {
+          "type": "string",
+          "description": "New password",
+          "pattern": "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%_*#?&])[A-Za-z\\d@$_!%*#?&]{8,}$",
+          "example": "Ab12345!"
+        }
+      },
+      "required": ["newPassword"]
+    },
+    "ChangePassword": {
+      "type": "object",
+      "properties": {
+        "newPassword": {
+          "type": "string",
+          "description": "New password",
+          "pattern": "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%_*#?&])[A-Za-z\\d@$_!%*#?&]{8,}$",
+          "example": "Ab12345!"
+        },
+        "oldPassword": {
+          "type": "string",
+          "pattern": "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%_*#?&])[A-Za-z\\d@$_!%*#?&]{8,}$",
+          "description": "The old password",
+          "example": "Fb12345!"
+        }
+      },
+      "required": ["newPassword", "oldPassword"]
+    },
+    "UserCreateByAdmin": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The name of the user",
+          "example": "Dima"
+        },
+        "email": {
+          "type": "string",
+          "description": "The email address of the user",
+          "pattern": "^[^\\s@]+@([^\\s@.,]+\\.)+[^\\s@.,]{2,}$",
+          "example": "dima@gmail.com"
+        },
+        "password": {
+          "type": "string",
+          "pattern": "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%_*#?&])[A-Za-z\\d@$_!%*#?&]{8,}$",
+          "description": "The password of the user",
+          "example": "Ab12345!"
+        },
+        "age": {
+          "type": "number",
+          "description": "The age of the user",
+          "example": "46"
+        },
+        "gender": {
+          "type": "string",
+          "enum": ["male", "female", "mixed"],
+          "description": "The gender of the user",
+          "example": "male"
+        },
+        "phone": {
+          "type": "string",
+          "pattern": "^([+]?\\d{1,2}[-\\s]?|)\\d{3}[-\\s]?\\d{3}[-\\s]?\\d{4}$",
+          "description": "The phone number of the user",
+          "example": "+380675555555"
+        },
+        "role": {
+          "type": "string",
+          "enum": ["customer", "seller", "premiumSeller", "manager", "admin"],
+          "description": "The role of the user"
+        }
+      },
+      "required": ["name", "email", "password", "phone", "role"]
+    },
+    "UserUpdate": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The name of the user",
+          "example": "Dima"
+        },
+        "age": {
+          "type": "number",
+          "description": "The age of the user",
+          "example": "46"
+        },
+        "gender": {
+          "type": "string",
+          "enum": ["male", "female", "mixed"],
+          "description": "The gender of the user",
+          "example": "male"
+        },
+        "phone": {
+          "type": "string",
+          "pattern": "^([+]?\\d{1,2}[-\\s]?|)\\d{3}[-\\s]?\\d{3}[-\\s]?\\d{4}$",
+          "description": "The phone number of the user",
+          "example": "+380675555555"
+        }
+      }
+    },
+    "UserUpdateByAdmin": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The name of the user",
+          "example": "Dima"
+        },
+        "password": {
+          "type": "string",
+          "pattern": "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%_*#?&])[A-Za-z\\d@$_!%*#?&]{8,}$",
+          "description": "The password of the user",
+          "example": "Ab12345!"
+        },
+        "age": {
+          "type": "number",
+          "description": "The age of the user",
+          "example": "46"
+        },
+        "gender": {
+          "type": "string",
+          "enum": ["male", "female", "mixed"],
+          "description": "The gender of the user",
+          "example": "male"
+        },
+        "phone": {
+          "type": "string",
+          "pattern": "^([+]?\\d{1,2}[-\\s]?|)\\d{3}[-\\s]?\\d{3}[-\\s]?\\d{4}$",
+          "description": "The phone number of the user",
+          "example": "+380675555555"
+        },
+        "role": {
+          "type": "string",
+          "enum": ["customer", "seller", "premiumSeller", "manager", "admin"],
+          "description": "The updated role of the user"
+        }
+      }
+    }
+  },
+
+  "securityDefinitions": {
+    "AccessToken": {
+      "type": "apiKey",
+      "name": "Authorization",
+      "in": "header"
+    },
+    "RefreshToken": {
+      "type": "apiKey",
+      "name": "Authorization",
+      "in": "header"
+    }
+  }
+
+}
